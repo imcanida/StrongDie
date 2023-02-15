@@ -6,8 +6,6 @@
 
 ## StrongDieComponents - ClassLibrary 
 .netcore6 library with implementation with InMemory EntityFrameWork, DbModels, and Repositories classes.
-## React hook based frontend:
-using automatic api generator from swagger json (swagger-typescript-api), reactstrap(an implementation of bootstrap), styledcomponents, and fontawesome for icons.
 
 ## strongdiebuncoexpress - Frontend
 Typescript React hook based website using reactstrap an implementation of bootstrap, swagger-typescript-api for automatic api generator from swagger json, styledcomponents for custom css/components, and fontawesome for icons.

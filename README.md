@@ -1,5 +1,5 @@
 # StrongDie 
-#### New Die Loading Technology!
+#### New LoadedDie™ Technology!
 
 ## StrongDieAPI - Backend:
 .netcore6 API using MediatR a CQRS Library, Also added in some SignalR Hubs for fun & better communication between clients on events that could occur on the frontend.

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { HubConnectionBuilder } from '@microsoft/signalr';
 export const HubUrl = "http://localhost:7259/gamehub"; // Replace with your hub URL
 

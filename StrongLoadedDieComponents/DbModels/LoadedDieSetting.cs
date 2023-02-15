@@ -4,7 +4,7 @@ using StrongDieComponents.DbModels.Interfaces;
 
 namespace StrongDieComponents.DbModels
 {
-    public class LoadedDieSetting : ILoadedDieSetting
+    public sealed class LoadedDieSetting : ILoadedDieSetting
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Column(Order = 1)]
         public int ID { get; set; }

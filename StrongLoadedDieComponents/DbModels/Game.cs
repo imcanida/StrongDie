@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StrongDieComponents.DbModels
 {
-    public class Game
+    public sealed class Game
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity), Column(Order = 1)]
         public int ID { get; set; }

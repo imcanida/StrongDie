@@ -5,7 +5,7 @@ using StrongDieComponents.DbModels.Interfaces;
 
 namespace StrongDieComponents.DbModels
 {
-    public class ApplicationUser : IApplicationUser
+    public sealed class ApplicationUser : IApplicationUser
     {
         public ApplicationUser()
         {

@@ -2,14 +2,14 @@ import { faDiceOne, faWeightHanging, faHatWizard, IconDefinition } from '@fortaw
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Alert, CardBody } from 'reactstrap'
-import { LoadDiceSettingsRequest, LoadedDieSetting } from '../../api'
+import { LoadDiceSettingsRequest, LoadedDieSetting, Player } from '../../api'
 import DieMap from './DieMap'
 import { StrongDieApi } from '../../helpers/StrongDieApi'
 import { FlexedSpaceBetweenDiv, StyledCard, StyledLabel } from '../../helpers/Styles'
 import FactorDescriptionMap from './FactorDescriptionMap'
 
 interface IDieControl {
-  user?: any
+  user?: Player
   dieValue?: number
   shake?: boolean
   loadedDieSetting: LoadedDieSetting
@@ -18,15 +18,20 @@ interface IDieControl {
 
 const DieControl = ({ user, dieValue = 1, shake = false, loadedDieSetting, onUpdate }: IDieControl) => {
   // -- State Management --
-  const [modal, setModal] = useState<boolean>(false)
-  const [favorSelection, setFavorSelection] = useState<any>(DieMap[1])
+  const [loadedDieSettingsModal, setShowLoadedDieSettingsModal] = useState<boolean>(false)
+
   const [dieToShow, setDieToShow] = useState<IconDefinition>(faDiceOne)
-  const [factor, setFactor] = useState<any>('1')
+  const [factor, setFactor] = useState<any>(loadedDieSetting?.factor ?? 1)
+  const [favorValue, setFavorValue] = useState<number>(loadedDieSetting?.favor ?? 1)
+  const [favorSelection, setFavorSelection] = useState<any>(DieMap[favorValue])
   const [lastDieValue, setLastDieValue] = useState<number>(0)
 
   // -- Value Toggles --
-  const toggleDieWeightSettingsModal = () => setModal(!modal)
-  const handleFavorSelection = (selection: IconDefinition) => setFavorSelection(selection)
+  const toggleDieWeightSettingsModal = () => setShowLoadedDieSettingsModal(!loadedDieSettingsModal)
+  const handleFavorSelection = (selection: IconDefinition, dieValue: number) => {
+    setFavorSelection(selection)
+    setFavorValue(dieValue)
+  }
 
   // -- Methods --
   const convertToIconDefinition = (value: number) => {
@@ -38,27 +43,28 @@ const DieControl = ({ user, dieValue = 1, shake = false, loadedDieSetting, onUpd
   }
 
   const shakeThemDice = useCallback(() => {
-    if(!shake) return
     // "Shake It"
-    // Set a timeout to call itself, to shake while we're shaking.
-    setTimeout(() => {
-      const roll = Math.floor(1 + Math.random() * 7)
-      convertToIconDefinition(roll)
-      shakeThemDice()
-    }, 400)
+    const roll = Math.floor(1 + Math.random() * 7)
+    convertToIconDefinition(roll)
   }, [])
 
   const updateLoadedSettings = () => {
-    if (user?.id ?? null) {
+    const newLoadedDieSetting: LoadedDieSetting = {
+      favor: favorValue,
+      factor: factor,
+      index: loadedDieSetting.index,
+    }
+    const userID = user?.userID ?? 0
+    if (user === null || userID <= 0) {
       toggleDieWeightSettingsModal()
       if (onUpdate) {
-        onUpdate(loadedDieSetting)
+        onUpdate(newLoadedDieSetting)
       }
       return
     }
     const request: LoadDiceSettingsRequest = {
-      userID: user.id,
-      loadedDieSettings: [loadedDieSetting],
+      userID: userID,
+      loadedDieSettings: [newLoadedDieSetting],
     }
     StrongDieApi.loadedDiceUpdateCreate(request)
       .then((response) => {
@@ -74,49 +80,53 @@ const DieControl = ({ user, dieValue = 1, shake = false, loadedDieSetting, onUpd
         toggleDieWeightSettingsModal()
       })
   }
+
   // -- Watchers --
   useEffect(() => {
     if (lastDieValue === dieValue) return
+    setFavorValue(dieValue)
     setDieToShow(DieMap[dieValue])
     setLastDieValue(dieValue)
   }, [dieValue, lastDieValue])
 
   useEffect(() => {
+    let intervalId: NodeJS.Timeout
     if (shake) {
-      shakeThemDice()
+      intervalId = setInterval(shakeThemDice, 400)
     }
+    return () => clearInterval(intervalId)
   }, [shake, shakeThemDice])
 
   const dieValues = Object.values(DieMap)
   return (
     <>
       <div>
-        <FontAwesomeIcon icon={dieToShow} size="6x" />
+        <FontAwesomeIcon icon={dieToShow} size="6x" color={(loadedDieSetting?.favor === favorValue && (loadedDieSetting?.factor ?? 0) > 0) ? '#ffc107' : ''} />
         <br />
         <Button outline onClick={toggleDieWeightSettingsModal}>
           <FontAwesomeIcon icon={faWeightHanging} />
         </Button>
       </div>
-      <Modal isOpen={modal} toggle={toggleDieWeightSettingsModal}>
+      <Modal isOpen={loadedDieSettingsModal} toggle={toggleDieWeightSettingsModal}>
         <ModalHeader toggle={toggleDieWeightSettingsModal}>Die Weight Settings</ModalHeader>
         <ModalBody>
           <Form>
             <FormGroup row>
               <Label>Favor</Label>
               <FlexedSpaceBetweenDiv>
-                {dieValues.map((value, index) => {
+                {dieValues.map((iconValue, dieValue) => {
                   return (
                     <>
                       <StyledCard
-                        tabIndex={index}
-                        key={index}
+                        tabIndex={dieValue}
+                        key={dieValue}
                         onClick={() => {
-                          handleFavorSelection(value)
+                          handleFavorSelection(iconValue, dieValue + 1)
                         }}
-                        selected={favorSelection === value}
+                        selected={favorSelection === iconValue}
                       >
-                        <CardBody className="text-center" style={{ cursor: 'pointer' }}>
-                          <FontAwesomeIcon icon={value} size="2x" />
+                        <CardBody key={dieValue} className="text-center" style={{ cursor: 'pointer' }}>
+                          <FontAwesomeIcon icon={iconValue} size="2x" />
                           <StyledLabel>Select</StyledLabel>
                         </CardBody>
                       </StyledCard>
@@ -166,11 +176,7 @@ const DieControl = ({ user, dieValue = 1, shake = false, loadedDieSetting, onUpd
             <Button color="secondary" onClick={toggleDieWeightSettingsModal} style={{ marginRight: '10px' }}>
               Cancel
             </Button>
-            <Button
-              color="primary"
-              onClick={updateLoadedSettings}
-              style={{ marginRight: '10px' }}
-            >
+            <Button color="primary" onClick={updateLoadedSettings} style={{ marginRight: '10px' }}>
               <FontAwesomeIcon icon={faHatWizard} /> Apply
             </Button>
           </div>

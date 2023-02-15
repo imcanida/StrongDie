@@ -1,4 +1,4 @@
-import { faDice, faHatWizard } from '@fortawesome/free-solid-svg-icons'
+import { faDice, faHatWizard, faRefresh } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useCallback, useEffect, useState } from 'react'
 import { Alert, Button, CardBody, Form, FormGroup, Label, Modal, ModalBody, ModalFooter, ModalHeader, Spinner } from 'reactstrap'
@@ -15,9 +15,7 @@ interface ILoadedDiceSettings {
 
 const Game = () => {
   // -- State Management --
-  const [showJoinModal, setShowJoinModal] = useState<boolean>(false)
-  const [player, setPlayer] = useState<Player>()
-  const [userName, setUserName] = useState<string>(localStorage.getItem('userName') ?? '')
+  // Initial set of dice.
   const [diceValues, setDiceValues] = useState<ILoadedDiceSettings[]>([
     {
       shakeDie: false,
@@ -34,16 +32,22 @@ const Game = () => {
       loadedDie: {
         factor: 1,
         favor: 5,
-        index: 0,
+        index: 1,
       },
     },
   ])
+
+  const [apiIsOffline, setApiIsOffline] = useState<boolean>(false)
+  const [showJoinModal, setShowJoinModal] = useState<boolean>(false)
+  const [player, setPlayer] = useState<Player>()
+  const [userName, setUserName] = useState<string>(localStorage.getItem('userName') ?? '')
   const [gameToJoin, setGameToJoin] = useState<GameListDetail>()
   const [gamesList, setGamesList] = useState<GameListDetail[]>([])
   // Using LocalStorage, For Ease Of local persistence.
   const [loadJoiningGame, setLoadJoiningGame] = useState<boolean>(false)
   const [loadGamesList, setLoadGamesList] = useState<boolean>(false)
   const [loadingDieRoll, setLoadingDieRoll] = useState<boolean>(false)
+  const [animateRolls] = useState<boolean>(false) // Just playing with "animating the die"
 
   // -- Value Toggles --
   const toggleDieWeightSettingsModal = () => setShowJoinModal(!showJoinModal)
@@ -66,14 +70,21 @@ const Game = () => {
             newDieValues[i].dieValue = rolledValue
           }
         }
-        setDiceValues(newDieValues)
+        if (animateRolls) {
+          setTimeout(() => {
+            setDiceValues(newDieValues)
+            setLoadingDieRoll(false)
+          }, 1500)
+        }
         return response
       })
       .catch((error) => {
         console.error(error)
       })
       .finally(() => {
-        setLoadingDieRoll(false)
+        if (!animateRolls) {
+          setLoadingDieRoll(false)
+        }
       })
   }
 
@@ -90,8 +101,10 @@ const Game = () => {
         if (player) {
           // See if they are in a game.
         }
+        setApiIsOffline(false)
       })
       .catch((error) => {
+        setApiIsOffline(true)
         console.log(error)
       })
       .finally(() => {
@@ -133,62 +146,83 @@ const Game = () => {
 
   return (
     <>
-      {loadGamesList ? (
+      {loadGamesList || loadJoiningGame ? (
         <Spinner />
       ) : (
         <>
-          {gamesList?.map((value, index) => {
-            return (
-              <>
-                <StyledCard
-                  tabIndex={index}
-                  key={index}
-                  onClick={() => {
-                    toggleDieWeightSettingsModal()
-                    setGameToJoin(value)
+          {/* Disabling Games for Now -- Just Showing Die Functions*/}
+          {false &&
+            gamesList?.map((value, index) => {
+              return (
+                <>
+                  <StyledCard
+                    tabIndex={index}
+                    key={index}
+                    onClick={() => {
+                      toggleDieWeightSettingsModal()
+                      setGameToJoin(value)
+                    }}
+                  >
+                    <CardBody className="text-center" style={{ cursor: 'pointer' }}>
+                      <GameLabel>{`Join Game #${index + 1}`}</GameLabel>
+                      <GameLabel>{`${value.players?.length} of 4 Players`}</GameLabel>
+                    </CardBody>
+                  </StyledCard>
+                </>
+              )
+            })}
+
+          {apiIsOffline && (
+            <>
+              <Alert>
+                Dice Service are currently Offline!
+                <Button>
+                  Retry <FontAwesomeIcon icon={faRefresh} />
+                </Button>
+              </Alert>
+            </>
+          )}
+          {apiIsOffline === false && (
+            <>
+              <FlexedDiv>
+                <Button onClick={rollDice} disabled={loadingDieRoll}>
+                  Roll <FontAwesomeIcon icon={faDice} />
+                </Button>
+              </FlexedDiv>
+              <FlexedDiv>
+                {/* -- To see if the factor/favor are being set properly.
+                <pre>
+                  {JSON.stringify(diceValues[0].loadedDie)}
+                </pre> */}
+                <DieControl
+                  key={`Die#${1}`}
+                  dieValue={diceValues[0].dieValue}
+                  shake={loadingDieRoll}
+                  loadedDieSetting={diceValues[0].loadedDie}
+                  onUpdate={(newValue: LoadedDieSetting) => {
+                    if (newValue) {
+                      const diceValuesCopy =  [...diceValues ]
+                      diceValuesCopy[0].loadedDie = newValue
+                      setDiceValues(diceValuesCopy)
+                    }
                   }}
-                >
-                  <CardBody className="text-center" style={{ cursor: 'pointer' }}>
-                    {/* <FontAwesomeIcon icon={value} size="2x" /> */}
-                    <GameLabel>{`Join Game #${index + 1}`}</GameLabel>
-                    <GameLabel>{`${value.players?.length} of 4 Players`}</GameLabel>
-                  </CardBody>
-                </StyledCard>
-              </>
-            )
-          })}
-          <FlexedDiv>
-            <Button onClick={rollDice}>
-              Roll <FontAwesomeIcon icon={faDice} />
-            </Button>
-          </FlexedDiv>
-          <FlexedDiv>
-            {loadingDieRoll ? 'yes' : 'no'}
-            <DieControl
-              dieValue={diceValues[0].dieValue}
-              shake={loadingDieRoll}
-              loadedDieSetting={diceValues[0].loadedDie}
-              onUpdate={(newValue: LoadedDieSetting) => {
-                if (newValue) {
-                  const diceValuesCopy = { ...diceValues }
-                  diceValuesCopy[0].loadedDie = newValue
-                  setDiceValues(diceValuesCopy)
-                }
-              }}
-            />
-            <DieControl
-              dieValue={diceValues[1].dieValue}
-              shake={loadingDieRoll}
-              loadedDieSetting={diceValues[1].loadedDie}
-              onUpdate={(newValue: LoadedDieSetting) => {
-                if (newValue) {
-                  const diceValuesCopy = { ...diceValues }
-                  diceValuesCopy[1].loadedDie = newValue
-                  setDiceValues(diceValuesCopy)
-                }
-              }}
-            />
-          </FlexedDiv>
+                />
+                <DieControl
+                  key={`Die#${2}`}
+                  dieValue={diceValues[1].dieValue}
+                  shake={loadingDieRoll}
+                  loadedDieSetting={diceValues[1].loadedDie}
+                  onUpdate={(newValue: LoadedDieSetting) => {
+                    if (newValue) {
+                      const diceValuesCopy = [...diceValues ]
+                      diceValuesCopy[1].loadedDie = newValue
+                      setDiceValues(diceValuesCopy)
+                    }
+                  }}
+                />
+              </FlexedDiv>
+            </>
+          )}
         </>
       )}
 

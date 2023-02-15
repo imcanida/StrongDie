@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrongDieAPI", "StrongLoadedDie\StrongDieAPI.csproj", "{D2ECEFAC-C728-4054-9647-82351323485E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrongDieTests", "StrongLoadedTests\StrongDieTests.csproj", "{DAE6290B-2524-4BB3-9C06-E97E5CF11F21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrongDieComponents", "StrongLoadedDieComponents\StrongDieComponents.csproj", "{B162C069-237E-4EE7-AE40-1404A3AB0EA3}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "strongdiebuncoexpress", "StrongDieBuncoExpress\strongdiebuncoexpress.esproj", "{E1E2E9CC-0FCA-44DE-ABDC-21C5B05DD535}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D2ECEFAC-C728-4054-9647-82351323485E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2ECEFAC-C728-4054-9647-82351323485E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2ECEFAC-C728-4054-9647-82351323485E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2ECEFAC-C728-4054-9647-82351323485E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAE6290B-2524-4BB3-9C06-E97E5CF11F21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAE6290B-2524-4BB3-9C06-E97E5CF11F21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAE6290B-2524-4BB3-9C06-E97E5CF11F21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAE6290B-2524-4BB3-9C06-E97E5CF11F21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B162C069-237E-4EE7-AE40-1404A3AB0EA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B162C069-237E-4EE7-AE40-1404A3AB0EA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B162C069-237E-4EE7-AE40-1404A3AB0EA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B162C069-237E-4EE7-AE40-1404A3AB0EA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1E2E9CC-0FCA-44DE-ABDC-21C5B05DD535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1E2E9CC-0FCA-44DE-ABDC-21C5B05DD535}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1E2E9CC-0FCA-44DE-ABDC-21C5B05DD535}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{E1E2E9CC-0FCA-44DE-ABDC-21C5B05DD535}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1E2E9CC-0FCA-44DE-ABDC-21C5B05DD535}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1E2E9CC-0FCA-44DE-ABDC-21C5B05DD535}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {502AF2B4-E41C-4EE0-B254-116A979B5CF0}
+	EndGlobalSection
+EndGlobal

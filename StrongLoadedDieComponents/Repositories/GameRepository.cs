@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StrongDieComponents.DbModels;
+using StrongDieComponents.Repositories.Interfaces;
 
 namespace StrongDieComponents.Repositories
 {
-    public sealed class GameRepository
+    public sealed class GameRepository : IGameRepository
     {
         private readonly ApplicationDb _db;
 
@@ -41,12 +42,37 @@ namespace StrongDieComponents.Repositories
             }
             if (game.Players.Any(i => i.ID == user.ID))
             {
-                throw new ArgumentException("User is already in the game.");
+                return game;
+            }
+            // Check if this player is in another game
+            var otherGames = await _db.Games.Include(ent => ent.Players)
+                .Where(i => i.Players.FirstOrDefault(i => i.ID == user.ID) != null)
+                .ToListAsync();
+
+            // Remove the player from any other games
+            foreach (var otherGame in otherGames)
+            {
+                otherGame.Players.Remove(user);
             }
             game.Players.Add(user);
             _db.Games.Update(game);
             await _db.SaveChangesAsync();
             return game;
+        }
+
+        public async Task RemoveUserFromAllGames(ApplicationUser user)
+        {
+            var games = await _db.Games
+                .Include(g => g.Players)
+                .Where(g => g.Players.Any(p => p.ID == user.ID))
+                .ToListAsync();
+
+            foreach (var game in games)
+            {
+                game.Players.Remove(user);
+            }
+
+            await _db.SaveChangesAsync();
         }
 
         public async Task<Game> Create(Game newGame)

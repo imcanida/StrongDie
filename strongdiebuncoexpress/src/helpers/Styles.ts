@@ -1,4 +1,4 @@
-import { Card } from "reactstrap"
+import { Button, Card } from "reactstrap"
 import styled from "styled-components"
 
 export const StyledCard = styled(Card)`
@@ -53,4 +53,23 @@ export const FlexedDiv = styled.div`
     > * {
         margin: 5px 5px 0px 5px;
     }
+`
+
+export const TightFlexDiv = styled.div`
+    display: flex;
+    justify-content: center;
+    > * {
+        margin: 1px 1px 0px 1px;
+    }
+`
+
+export const StrongDieButton = styled(Button)`
+  background-color: #ff5308;
+  color: #000;
+  font-weight: bold;
+
+  &:hover {
+    background-color: #000;
+    color: #ff5308;
+  }
 `

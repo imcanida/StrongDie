@@ -1,7 +1,9 @@
 using System.Reflection;
 using MediatR;
 using StrongDieComponents;
+using StrongDieComponents.DbModels.Interfaces;
 using StrongDieComponents.Repositories;
+using StrongDieComponents.Repositories.Interfaces;
 using StrongLoadedDie.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,10 +15,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ApplicationDb>();
-builder.Services.AddScoped<LoadedDieSettingsRepository>();
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<GameRepository>();
+builder.Services.AddDbContext<IApplicationDb, ApplicationDb>();
+builder.Services.AddScoped<ILoadedDieSettingsRepository, LoadedDieSettingsRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IGameRepository, GameRepository>();
 
 // SignalR
 builder.Services.AddSignalR().AddJsonProtocol();

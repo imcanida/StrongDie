@@ -5,18 +5,20 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, La
 import { LoadDiceSettingsRequest, LoadedDieSetting, Player } from '../../api'
 import DieMap from './DieMap'
 import { StrongDieApi } from '../../helpers/StrongDieApi'
-import { FlexedSpaceBetweenDiv, StyledCard, StyledLabel } from '../../helpers/Styles'
+import { FlexedSpaceBetweenDiv, StrongDieButton, StyledCard, StyledLabel } from '../../helpers/Styles'
 import FactorDescriptionMap from './FactorDescriptionMap'
+import { SizeProp } from '@fortawesome/fontawesome-svg-core'
 
 interface IDieControl {
   user?: Player
   dieValue?: number
-  shake?: boolean
-  loadedDieSetting: LoadedDieSetting
+  roll?: boolean
+  loadedDieSetting?: LoadedDieSetting
   onUpdate?: (loadedDieSetting: any) => void
+  size?: SizeProp
 }
 
-const DieControl = ({ user, dieValue = 1, shake = false, loadedDieSetting, onUpdate }: IDieControl) => {
+const DieControl = ({ user, dieValue = 1, roll = false, loadedDieSetting, onUpdate, size ='6x' }: IDieControl) => {
   // -- State Management --
   const [loadedDieSettingsModal, setShowLoadedDieSettingsModal] = useState<boolean>(false)
 
@@ -42,8 +44,8 @@ const DieControl = ({ user, dieValue = 1, shake = false, loadedDieSetting, onUpd
     setDieToShow(DieMap[value])
   }
 
-  const shakeThemDice = useCallback(() => {
-    // "Shake It"
+  const rollThemDie = useCallback(() => {
+    // "roll It"
     const roll = Math.floor(1 + Math.random() * 7)
     convertToIconDefinition(roll)
   }, [])
@@ -52,7 +54,7 @@ const DieControl = ({ user, dieValue = 1, shake = false, loadedDieSetting, onUpd
     const newLoadedDieSetting: LoadedDieSetting = {
       favor: favorValue,
       factor: factor,
-      index: loadedDieSetting.index,
+      index: loadedDieSetting?.index,
     }
     const userID = user?.userID ?? 0
     if (user === null || userID <= 0) {
@@ -91,21 +93,30 @@ const DieControl = ({ user, dieValue = 1, shake = false, loadedDieSetting, onUpd
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout
-    if (shake) {
-      intervalId = setInterval(shakeThemDice, 400)
+    if (roll) {
+      intervalId = setInterval(rollThemDie, 400)
     }
     return () => clearInterval(intervalId)
-  }, [shake, shakeThemDice])
+  }, [roll, rollThemDie])
 
   const dieValues = Object.values(DieMap)
   return (
-    <>
+    <div data-testid="die-control">
       <div>
-        <FontAwesomeIcon icon={dieToShow} size="6x" color={(loadedDieSetting?.favor === favorValue && (loadedDieSetting?.factor ?? 0) > 0) ? '#ffc107' : ''} />
-        <br />
-        <Button outline onClick={toggleDieWeightSettingsModal}>
-          <FontAwesomeIcon icon={faWeightHanging} />
-        </Button>
+        <FontAwesomeIcon
+          color={loadedDieSetting?.favor === favorValue && (loadedDieSetting?.factor ?? 0) > 0 ? '#ff5308' : '#000'}
+          icon={dieToShow}
+          size={size ?? '6x'}
+        />
+        {loadedDieSetting && (
+          <>
+            <div>
+              <Button onClick={toggleDieWeightSettingsModal} outline>
+                <FontAwesomeIcon icon={faWeightHanging} />
+              </Button>
+            </div>
+          </>
+        )}
       </div>
       <Modal isOpen={loadedDieSettingsModal} toggle={toggleDieWeightSettingsModal}>
         <ModalHeader toggle={toggleDieWeightSettingsModal}>Die Weight Settings</ModalHeader>
@@ -116,21 +127,19 @@ const DieControl = ({ user, dieValue = 1, shake = false, loadedDieSetting, onUpd
               <FlexedSpaceBetweenDiv>
                 {dieValues.map((iconValue, dieValue) => {
                   return (
-                    <>
-                      <StyledCard
-                        tabIndex={dieValue}
-                        key={dieValue}
-                        onClick={() => {
-                          handleFavorSelection(iconValue, dieValue + 1)
-                        }}
-                        selected={favorSelection === iconValue}
-                      >
-                        <CardBody key={dieValue} className="text-center" style={{ cursor: 'pointer' }}>
-                          <FontAwesomeIcon icon={iconValue} size="2x" />
-                          <StyledLabel>Select</StyledLabel>
-                        </CardBody>
-                      </StyledCard>
-                    </>
+                    <StyledCard
+                      key={`select_die_to_favor_${dieValue}`}
+                      onClick={() => {
+                        handleFavorSelection(iconValue, dieValue + 1)
+                      }}
+                      selected={favorSelection === iconValue}
+                      tabIndex={dieValue}
+                    >
+                      <CardBody className="text-center" key={dieValue} style={{ cursor: 'pointer' }}>
+                        <FontAwesomeIcon icon={iconValue} size="2x" />
+                        <StyledLabel>Select</StyledLabel>
+                      </CardBody>
+                    </StyledCard>
                   )
                 })}
               </FlexedSpaceBetweenDiv>
@@ -151,15 +160,15 @@ const DieControl = ({ user, dieValue = 1, shake = false, loadedDieSetting, onUpd
               </Label>
               <FlexedSpaceBetweenDiv>
                 <input
-                  type="range"
                   defaultValue={factor}
-                  min="1"
                   max="5"
+                  min="1"
                   onChange={(event) => {
                     setFactor(event?.target?.value ?? 0)
                   }}
-                  style={{ width: '80%' }}
                   step="1"
+                  style={{ width: '80%' }}
+                  type="range"
                 />
                 <label style={{ fontSize: '24px', textAlign: 'right' }}>x {factor}</label>
               </FlexedSpaceBetweenDiv>
@@ -173,16 +182,16 @@ const DieControl = ({ user, dieValue = 1, shake = false, loadedDieSetting, onUpd
         </ModalBody>
         <ModalFooter>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button color="secondary" onClick={toggleDieWeightSettingsModal} style={{ marginRight: '10px' }}>
+            <StrongDieButton color="secondary" onClick={toggleDieWeightSettingsModal} style={{ marginRight: '10px' }}>
               Cancel
-            </Button>
-            <Button color="primary" onClick={updateLoadedSettings} style={{ marginRight: '10px' }}>
+            </StrongDieButton>
+            <StrongDieButton color="primary" onClick={updateLoadedSettings} style={{ marginRight: '10px' }}>
               <FontAwesomeIcon icon={faHatWizard} /> Apply
-            </Button>
+            </StrongDieButton>
           </div>
         </ModalFooter>
       </Modal>
-    </>
+    </div>
   )
 }
-export default DieControl
+export { DieControl }

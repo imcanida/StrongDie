@@ -1,23 +1,29 @@
-﻿using MediatR;
+﻿using System.Net.WebSockets;
+using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using StrongDieComponents.DbModels;
-using StrongDieComponents.Repositories;
+using StrongDieComponents.Repositories.Interfaces;
+using StrongLoadedDie.Hubs;
 
 namespace StrongDieAPI.Controllers.Game.Join
 {
     public sealed class JoinGameHandler : IRequestHandler<JoinGameRequest, JoinGameResponse>
     {
-        private readonly UserRepository _userRepository;
-        private readonly GameRepository _gameRepository;
-        public JoinGameHandler(UserRepository userRepository, GameRepository gameRepository)
+        private readonly IGameRepository _gameRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IHubContext<GameHub> _gameHub;
+
+        public JoinGameHandler(IGameRepository gameRepository, IUserRepository userRepository, IHubContext<GameHub> gameHubContext)
         {
             _userRepository = userRepository;
             _gameRepository = gameRepository;
+            _gameHub = gameHubContext;
         }
 
         public async Task<JoinGameResponse> Handle(JoinGameRequest request, CancellationToken cancellationToken)
         {
             ApplicationUser? user = null;
-            
+
             // Check if the player exists in the db
             if (request.UserID.HasValue)
             {
@@ -27,7 +33,7 @@ namespace StrongDieAPI.Controllers.Game.Join
             {
                 user = await _userRepository.GetByUserName(request.UserName);
             }
-            
+
             // Still no user -- Create it
             if (user == null)
             {
@@ -39,28 +45,34 @@ namespace StrongDieAPI.Controllers.Game.Join
 
             // Check if a game exists with less then 4 people
             var game = await _gameRepository.GetByID(request.GameID);
-            if(game == null)
+            if (game == null)
             {
                 throw new ArgumentException("Game was not found with given ID");
             }
 
-            if(game.Players.Count() >= 4)
+            if (game.Players.Count() >= 4)
             {
-                throw new ArgumentException("Game was not found with given ID");
+                throw new ArgumentException("Game is full");
             }
 
             // Add the player to the game
             game = await _gameRepository.AddPlayer(game, user);
 
+            var player = new Models.Player()
+            {
+                UserID = user.ID,
+                UserName = user.Name
+            };
+            await _gameHub.Clients
+                        .All
+                        //.Group(GameHub.DeriveGameName(game.ID))
+                        .SendAsync(GameHub.GameHubMessageTypes.JoinGame.ToString(), player);
+
             // Return the player and the game
             return new JoinGameResponse()
             {
                 GameID = game.ID,
-                Player = new Models.Player()
-                {
-                    UserID = user.ID,
-                    UserName = user.Name
-                },
+                Player = player,
                 Players = game.Players.Select(i => new Models.Player()
                 {
                     UserID = i.ID,

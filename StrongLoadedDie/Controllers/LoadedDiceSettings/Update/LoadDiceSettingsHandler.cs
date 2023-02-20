@@ -1,16 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
 using MediatR;
 using StrongDieComponents.DbModels;
-using StrongDieComponents.Repositories;
+using StrongDieComponents.Repositories.Interfaces;
 
 namespace StrongDieAPI.Controllers.LoadedDiceSettings.Update
 {
     public class LoadDiceSettingsHandler : IRequestHandler<LoadDiceSettingsRequest, LoadDiceResponse>
     {
-        private readonly LoadedDieSettingsRepository _loadedDiceSettingsRepository;
-        private readonly UserRepository _userRepository;
+        private readonly ILoadedDieSettingsRepository _loadedDiceSettingsRepository;
+        private readonly IUserRepository _userRepository;
 
-        public LoadDiceSettingsHandler(LoadedDieSettingsRepository loadedDiceSettingsRepository, UserRepository userRepository)
+        public LoadDiceSettingsHandler(ILoadedDieSettingsRepository loadedDiceSettingsRepository, IUserRepository userRepository)
         {
             _loadedDiceSettingsRepository = loadedDiceSettingsRepository;
             _userRepository = userRepository;

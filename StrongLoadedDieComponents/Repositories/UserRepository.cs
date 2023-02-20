@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StrongDieComponents.DbModels;
+using StrongDieComponents.Repositories.Interfaces;
 
 namespace StrongDieComponents.Repositories
 {
-    public sealed class UserRepository
+    public sealed class UserRepository : IUserRepository
     {
         private readonly ApplicationDb _db;
 
@@ -33,6 +34,11 @@ namespace StrongDieComponents.Repositories
 
         public async Task<ApplicationUser> Create(ApplicationUser user)
         {
+            var existCheck = await _db.Users.FirstOrDefaultAsync(i => i.Name.Equals(user.Name));
+            if (existCheck != null)
+            {
+                throw new ArgumentException("Username is taken");
+            }
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
             return user;

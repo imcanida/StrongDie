@@ -1,24 +1,18 @@
-import logo from './logo.svg'
 import './App.css'
-import { Navbar, NavbarBrand } from 'reactstrap'
-import Game from './components/Game'
+import { ToastContainer } from 'react-toastify'
+import { Game } from './components'
+import 'react-toastify/dist/ReactToastify.css'
+import { AppContextProvider } from './context'
+import { TopHeader } from './components/TopHeader'
+
 const App = () => {
   return (
     <div className="App">
-      <Navbar className="my-2" color="dark" dark>
-        <NavbarBrand href="/">
-          <img
-            alt="logo"
-            src={logo}
-            style={{
-              height: 40,
-              width: 40,
-            }}
-          />{' '}
-          <small style={{ fontSize: '12px' }}>Strong-Die</small>
-        </NavbarBrand>
-      </Navbar>
-      <Game />
+      <ToastContainer />
+      <AppContextProvider>
+        <TopHeader />
+        <Game />
+      </AppContextProvider>
     </div>
   )
 }

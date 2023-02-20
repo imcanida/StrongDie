@@ -1,13 +1,13 @@
 ﻿using MediatR;
 using StrongDieAPI.Models;
-using StrongDieComponents.Repositories;
+using StrongDieComponents.Repositories.Interfaces;
 
 namespace StrongDieAPI.Controllers.Game.List
 {
     public sealed class GameListHandler : IRequestHandler<GameListRequest, GameListResponse>
     {
-        private readonly GameRepository _gameRepository;
-        public GameListHandler(GameRepository gameRepository)
+        private readonly IGameRepository _gameRepository;
+        public GameListHandler(IGameRepository gameRepository)
         {
             _gameRepository = gameRepository;
         }

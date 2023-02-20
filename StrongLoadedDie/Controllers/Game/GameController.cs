@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StrongDieAPI.Controllers.Game.Details;
 using StrongDieAPI.Controllers.Game.Join;
+using StrongDieAPI.Controllers.Game.Leave;
 using StrongDieAPI.Controllers.Game.List;
 
 namespace StrongDieAPI.Controllers.Game
@@ -43,7 +44,38 @@ namespace StrongDieAPI.Controllers.Game
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error \"loading\" the dice.");
+                _logger.LogError(ex, "Error joining game.");
+                return BadRequest(ex.Message);
+            }
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Leave a game as a user.
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPost, Route("leave")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LeaveGameResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Leave([FromBody] LeaveGameRequest command)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Leave failed.");
+            }
+            if (string.IsNullOrWhiteSpace(command.UserName))
+            {
+                return NotFound("UserName must be provided, in this very secure app.");
+            }
+            LeaveGameResponse? response;
+            try
+            {
+                response = await _mediator.Send(command);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error leaving game.");
                 return BadRequest(ex.Message);
             }
             return Ok(response);

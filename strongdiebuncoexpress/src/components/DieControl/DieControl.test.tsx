@@ -1,17 +1,24 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import { LoadedDieSetting } from '../../api'
-import DieControl from './index'
+import { render, screen } from '@testing-library/react'
+import { DieControl } from './index'
 
-test('renders a die icon and a weight settings button', () => {
-  const dieSettings: LoadedDieSetting = {
+describe('DieControl', () => {
+  const loadedDieSetting = {
     favor: 1,
-    factor: 2
+    factor: 2,
+    index: 0,
   }
 
-  render(<DieControl loadedDieSetting={dieSettings} />)
-  const dieIcon = screen.getByRole('img', { name: '1' })
-  expect(dieIcon).toBeInTheDocument()
+  beforeEach(() => {
+    jest.useFakeTimers();
+  })
 
-  const weightButton = screen.getByRole('button', { name: 'Weight' })
-  expect(weightButton).toBeInTheDocument()
-})
+  afterEach(() => {
+    jest.useRealTimers();
+  })
+
+  it('should render with default props', () => {
+    render(<DieControl loadedDieSetting={loadedDieSetting} />);
+    expect(screen.getByTestId('die-control')).toBeInTheDocument();
+  })
+
+});

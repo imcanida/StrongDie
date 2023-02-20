@@ -1,14 +1,14 @@
 ﻿using MediatR;
 using StrongDieAPI.Models;
 using StrongDieComponents.DbModels;
-using StrongDieComponents.Repositories;
+using StrongDieComponents.Repositories.Interfaces;
 
 namespace StrongDieAPI.Controllers.LoadedDiceSettings.List
 {
     public sealed class LoadedDiceListHandler : IRequestHandler<LoadedDiceListRequest, LoadedDiceListResponse>
     {
-        private readonly LoadedDieSettingsRepository _loadedDieSettingsRepository;
-        public LoadedDiceListHandler(LoadedDieSettingsRepository loadedDieSettingsRepository)
+        private readonly ILoadedDieSettingsRepository _loadedDieSettingsRepository;
+        public LoadedDiceListHandler(ILoadedDieSettingsRepository loadedDieSettingsRepository)
         {
             _loadedDieSettingsRepository = loadedDieSettingsRepository;
         }

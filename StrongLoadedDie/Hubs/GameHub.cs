@@ -1,26 +1,66 @@
 using Microsoft.AspNetCore.SignalR;
+using StrongDieAPI.Hubs.Interfaces;
+using StrongDieAPI.Models;
+using StrongDieComponents.DbModels;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace StrongLoadedDie.Hubs
 {
     /// <summary>
     /// Game (SignalR) Hub 
     /// </summary>
-    public sealed class GameHub : Hub
+    public sealed class GameHub : Hub, IGameHub
     {
-        public async Task SendMessage(string name, string message)
+        public enum GameHubMessageTypes
         {
-            // Call the broadcastMessage method to update clients.
-            await Clients.All.SendAsync("sendMessage", name, message);
+            SendMessage,
+            JoinGame,
+            LeaveGame,
+            DiceRolled
         }
 
-        public async Task PlayerConnected(int gameID, string username)
+        public static string DeriveGameName(int gameID)
         {
-            await Clients.All.SendAsync("PlayerConnected", gameID, username);
+            return $"Game_#{gameID}";
         }
 
-        public async Task RollDice(string username, int[] values)
+        private readonly static Dictionary<string, string> _connections = new Dictionary<string, string>();
+
+        public async Task JoinGame(int gameId, string userName)
         {
-            await Clients.Others.SendAsync("ReceiveDiceRoll", username, values);
+            var gameName = DeriveGameName(gameId);
+            if (_connections.ContainsKey(Context.ConnectionId))
+            {
+                // Leave the last game.
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, _connections[Context.ConnectionId]);
+            }
+            _connections.Add(Context.ConnectionId, gameName);
+            await Groups.AddToGroupAsync(Context.ConnectionId, gameName);
         }
+
+        public async Task LeaveGame(int gameId, string userName)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, DeriveGameName(gameId));
+            await SendLeaveGameMessage(gameId, userName);
+        }
+
+        public async Task SendLeaveGameMessage(int gameId, string userName)
+        {
+            var gameName = DeriveGameName(gameId);
+            var message = $"{userName} has left the game.";
+            await Clients.Group(gameName).SendAsync(GameHubMessageTypes.LeaveGame.ToString(), message);
+        }
+
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            if (_connections.TryGetValue(Context.ConnectionId, out string? groupName))
+            {
+                _connections.Remove(Context.ConnectionId);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+            }
+
+            await base.OnDisconnectedAsync(exception);
+        }
+
     }
 }

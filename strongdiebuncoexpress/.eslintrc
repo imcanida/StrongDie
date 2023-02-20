@@ -1,0 +1,53 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "plugins": ["@typescript-eslint", "react-hooks"],
+  "env": {
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "ecmaFeatures": {
+      "legacyDecorators": true,
+      "jsx": true
+    }
+  },
+  "settings": {
+    "react": {
+      "version": "17"
+    },
+    "import/resolver": {
+      "node": {
+        "extensions": [".ts", ".tsx"]
+      }
+    }
+  },
+  "globals": {
+    "window": true
+  },
+  "rules": {
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "import/export": 0,
+    "import/no-absolute-path": "off",
+    "new-cap": "off",
+    "react/display-name": 0,
+    "react/jsx-fragments": 0,
+    "react/jsx-handler-names": 0,
+    "react/jsx-pascal-case": 0,
+    "react/jsx-sort-props": 1,
+    "react/no-unescaped-entities": 0,
+    "react/no-unused-prop-types": 0,
+    "react/prop-types": 0,
+    "react/react-in-jsx-scope": 0,
+    "space-before-function-paren": 0,
+    "@typescript-eslint/explicit-module-boundary-types": 0,
+    "@typescript-eslint/no-explicit-any": 0
+  }
+}

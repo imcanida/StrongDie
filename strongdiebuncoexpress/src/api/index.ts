@@ -64,6 +64,20 @@ export interface JoinGameResponse {
   players?: Player[] | null
 }
 
+export interface LeaveGameRequest {
+  /** @format int32 */
+  userID?: number | null
+  userName: string
+  /**
+   * @format int32
+   * @min 1
+   * @max 2147483647
+   */
+  gameID: number
+}
+
+export type LeaveGameResponse = object
+
 export interface LoadDiceResponse {
   updatedLoadedDieSettings?: LoadedDieSetting[] | null
 }
@@ -330,6 +344,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Game
+     * @name GameLeaveCreate
+     * @request POST:/api/game/leave
+     */
+    gameLeaveCreate: (data: LeaveGameRequest, params: RequestParams = {}) =>
+      this.request<LeaveGameResponse, ProblemDetails>({
+        path: `/api/game/leave`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Game
      * @name GameListCreate
      * @request POST:/api/game/list
      */
@@ -408,6 +439,20 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Ping
+     * @name PingCreate
+     * @request POST:/api/ping
+     */
+    pingCreate: (params: RequestParams = {}) =>
+      this.request<void, ProblemDetails>({
+        path: `/api/ping`,
+        method: 'POST',
         ...params,
       }),
   }

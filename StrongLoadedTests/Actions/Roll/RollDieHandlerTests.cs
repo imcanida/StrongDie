@@ -1,11 +1,26 @@
-using NuGet.Frameworks;
+using Microsoft.AspNetCore.SignalR;
+using Moq;
 using StrongDieAPI.Controllers.Game.Roll;
+using StrongDieComponents.Repositories.Interfaces;
+using StrongLoadedDie.Hubs;
 
 namespace StrongDieTests.Actions.Roll
 {
     [TestClass]
     public class Actions_RollDieHandlerTests
     {
+        private RollDiceHandler _controller = null!;
+        private Mock<IUserRepository> _mockUserRepository = null!;
+        private Mock<IHubContext<GameHub>> _mockGameHub = null!;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _mockUserRepository = new Mock<IUserRepository>();
+            _mockGameHub = new Mock<IHubContext<GameHub>>();
+            _controller = new RollDiceHandler(_mockGameHub.Object, _mockUserRepository.Object);
+        }
+
         [TestMethod]
         public async Task Handle_Returns_Correct_Number_Of_Dice_Rolls()
         {
@@ -14,10 +29,9 @@ namespace StrongDieTests.Actions.Roll
             {
                 NumberOfDiceToRoll = 2
             };
-            var handler = new RollDiceHandler();
 
             // Act
-            var result = await handler.Handle(request, CancellationToken.None);
+            var result = await _controller.Handle(request, CancellationToken.None);
 
             // Assert
             Assert.AreEqual(request.NumberOfDiceToRoll, result.DieRollResults.Length);
@@ -39,11 +53,9 @@ namespace StrongDieTests.Actions.Roll
                     }
                 }
             };
-
-            var handler = new RollDiceHandler();
-
+            
             // Act
-            var result = await handler.Handle(request, CancellationToken.None);
+            var result = await _controller.Handle(request, CancellationToken.None);
 
             // Assert
             Assert.AreEqual(request.NumberOfDiceToRoll, result.DieRollResults.Length);

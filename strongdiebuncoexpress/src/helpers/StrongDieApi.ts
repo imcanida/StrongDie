@@ -1,4 +1,4 @@
-import { Api } from "../api";
+import { Api, JoinGameRequest } from "../api";
 
 /**
  * Little wrapper around the generate api
@@ -11,3 +11,13 @@ export const gateWay = new Api({
   },
 })
 export const StrongDieApi = gateWay.api
+
+export const PromiseToJoinGame = async (request: JoinGameRequest) => {
+  return StrongDieApi.gameJoinCreate(request)
+    .then((response) => {
+      return response?.data ?? response
+    })
+    .catch((error) => {
+      return error
+    })
+}

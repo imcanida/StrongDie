@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StrongDieComponents.DbModels;
+using StrongDieComponents.Repositories.Interfaces;
 
 namespace StrongDieComponents.Repositories
 {
-    public sealed class LoadedDieSettingsRepository
+    public sealed class LoadedDieSettingsRepository : ILoadedDieSettingsRepository
     {
         private readonly ApplicationDb _db;
 
@@ -16,7 +17,7 @@ namespace StrongDieComponents.Repositories
         {
             return await _db.LoadedDieSettings.FirstOrDefaultAsync(i => i.ID == id);
         }
-        
+
         public async Task<IEnumerable<LoadedDieSetting>> GetByUserID(int userID)
         {
             return await _db.LoadedDieSettings.Where(i => i.UserID == userID).ToListAsync();
@@ -46,11 +47,11 @@ namespace StrongDieComponents.Repositories
                     _db.LoadedDieSettings.Add(loadedDieSetting);
                     continue;
                 }
-                
+
                 var existsCheck = _db.LoadedDieSettings
                     .FirstOrDefault(i => i.ID == loadedDieSetting.ID && i.UserID == loadedDieSetting.UserID);
-                
-                if(existsCheck == null)
+
+                if (existsCheck == null)
                 {
                     _db.LoadedDieSettings.Add(loadedDieSetting);
                     continue;

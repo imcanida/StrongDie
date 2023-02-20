@@ -19,6 +19,7 @@ interface IGameListItem {
 const GameListItem = ({ gameName, players, onJoin, onLeave }: IGameListItem) => {
   const { player } = useContext<AppContextDetails>(AppContext)
   const [activePlayerDiceRolls, setActivePlayerDiceRolls] = useState<{ [key: string]: number[] }>({})
+  
   // Map activePlayerDiceRolls from Players.
   const filledPlayerSlots = players.map((participant) => {
     const userName = participant.userName ?? ''

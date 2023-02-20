@@ -1,12 +1,15 @@
 import * as signalR from '@microsoft/signalr'
 import { createContext, useState } from 'react'
-import { Player } from './api'
+import { GameListDetail, Player } from './api'
 import { useOnFirstLoad } from './helpers/useFirstLoad'
 
 export interface AppContextDetails {
   player?: Player
   setPlayer: (player?: Player) => void
   getPlayer: () => Player | undefined
+  game?: GameListDetail
+  setGame: (game?: GameListDetail) => void
+  getGame: () => GameListDetail | undefined
   connection: signalR.HubConnection | undefined
   isConnected: boolean
 }
@@ -17,6 +20,8 @@ export const AppContextProvider = ({ children }: any) => {
   const [connection, setConnection] = useState<signalR.HubConnection>()
   const [isConnected, setIsConnected] = useState(false)
   const [player, setPlayerState] = useState<Player | undefined>(undefined)
+  const [game, setGameState] = useState<GameListDetail | undefined>(undefined)
+
   const setPlayer = (newPlayer?: Player) => {
     setPlayerState(newPlayer)
     if (newPlayer) {
@@ -38,8 +43,30 @@ export const AppContextProvider = ({ children }: any) => {
     localStorage.setItem('localPlayer', JSON.stringify(player))
   }
 
+  const setGame = (game?: GameListDetail) => {
+    setGameState(game)
+    if (game) {
+      setLocalGame(game)
+    } else {
+      localStorage.removeItem('localGame')
+    }
+  }
+
+  const getGame = (): GameListDetail | undefined => {
+    const game = localStorage.getItem('localGame')
+    if (game) {
+      return JSON.parse(game)
+    }
+    return undefined
+  }
+
+  const setLocalGame = (game: GameListDetail) => {
+    localStorage.setItem('localGame', JSON.stringify(game))
+  }
+
   useOnFirstLoad(() => {
     setPlayer(getPlayer())
+    setGame(getGame())
   })
 
   useOnFirstLoad(() => {
@@ -69,5 +96,5 @@ export const AppContextProvider = ({ children }: any) => {
     }
   })
 
-  return <AppContext.Provider value={{ player, setPlayer, getPlayer, connection, isConnected }}>{children}</AppContext.Provider>
+  return <AppContext.Provider value={{ player, setPlayer, getPlayer, game, setGame, getGame, connection, isConnected }}>{children}</AppContext.Provider>
 }

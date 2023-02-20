@@ -1,13 +1,32 @@
 import { useContext } from 'react'
 import { Navbar, NavbarBrand, Nav, NavItem } from 'reactstrap'
+import { LeaveGameRequest } from '../../api'
 import { AppContextDetails, AppContext } from '../../context'
+import { StrongDieApi } from '../../helpers/StrongDieApi'
 import { StrongDieButton } from '../../helpers/Styles'
 import logo from '../../logo.svg'
 
 const TopHeader = () => {
-  const { player, setPlayer } = useContext<AppContextDetails>(AppContext)
+  const { player, setPlayer, game, setGame } = useContext<AppContextDetails>(AppContext)
   const handleLogout = () => {
-    setPlayer(undefined)
+    leaveGame()?.then(() => {
+      setGame(undefined)
+      setPlayer(undefined)
+    })
+  }
+  const leaveGame = () => {
+    if (!player?.userName && !game?.gameID) return
+    const request: LeaveGameRequest = {
+      userName: player?.userName ?? '',
+      gameID: game?.gameID ?? 0,
+    }
+    return StrongDieApi.gameLeaveCreate(request)
+      .then((response) => {
+        return response
+      })
+      .catch((error) => {
+        return error
+      })
   }
   return (
     <Navbar className="my-2" color="dark" dark>

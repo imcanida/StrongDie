@@ -12,12 +12,11 @@ import { AppContext, AppContextDetails } from '../../context'
 import { useOnFirstLoad } from '../../helpers/useFirstLoad'
 import { GameListItem } from '../GameListItem'
 import { useSignalRGameHub } from '../useSignalRGameHub'
-import { toast } from 'react-toastify'
 
 const Game = () => {
   // Using App Context State
-  const { player } = useContext<AppContextDetails>(AppContext)
-
+  const { player, game, setGame } = useContext<AppContextDetails>(AppContext)
+  const [participant, setParticipant] = useState<Player | undefined>()
   // -- State Management --
   // Initial set of dice.
   const [diceValues, setDiceValues] = useState<ILoadedDiceSettings[]>([
@@ -46,7 +45,7 @@ const Game = () => {
   const [gameToJoin, setGameToJoin] = useState<GameListDetail>()
   const [gamesList, setGamesList] = useState<GameListDetail[]>([])
   const [loadGamesList, setLoadGamesList] = useState<boolean>(false)
-
+  
   const [loadingDieRoll, setLoadingDieRoll] = useState<boolean>(false)
   const [animateRolls] = useState<boolean>(false) // Just playing with "animating the die"
 
@@ -89,9 +88,11 @@ const Game = () => {
       const playerGameIndex = indexOfGame(gamesList ?? [])
       // No game found --
       if (playerGameIndex < 0) {
-        setGameToJoin(undefined)
+        setGame(undefined)
+        // setGameToJoin(undefined)
       } else if (gamesList) {
-        setGameToJoin(gamesList[playerGameIndex])
+        setGame(gamesList[playerGameIndex])
+        // setGameToJoin(gamesList[playerGameIndex])
       }
     }
   }, [gamesList, indexOfGame, player])
@@ -111,7 +112,7 @@ const Game = () => {
     const request: RollDiceRequest = {
       userID: player?.userID,
       userName: player?.userName,
-      gameID: gameToJoin?.gameID,
+      gameID: game?.gameID,
       numberOfDiceToRoll: 2,
       loadedDiceSettings: diceValues.map((i) => i.loadedDie),
     }
@@ -148,10 +149,10 @@ const Game = () => {
   }
 
   const leaveGame = () => {
-    if (!gameToJoin?.gameID || !player?.userName) return
+    if (!game?.gameID || !player?.userName) return
     const request: LeaveGameRequest = {
       userName: player?.userName,
-      gameID: gameToJoin?.gameID,
+      gameID: game?.gameID,
     }
     return StrongDieApi.gameLeaveCreate(request)
       .then((response) => {
@@ -172,12 +173,14 @@ const Game = () => {
     setGameToJoin(value)
   }
 
-  const [participant, setParticipant] = useState<Player | undefined>()
+  
 
   // -- Watcher when the player is changed to undefined (logout) -- leave the game as well.
   useEffect(() => {
     if (!player) {
-      leaveGame()
+      leaveGame()?.then(() => {
+        loadGames()
+      })
     }
   }, [player, participant])
 
@@ -192,16 +195,10 @@ const Game = () => {
 
   // useSignalRGameHub callback registering
   useSignalRGameHub({
-    // Not needed here.
-    // onDiceRolled: (message) => {
-    //   console.log(message)
-    // },
-    onJoinGame: (message) => {
-      toast.success(`🦄 ${message.userName} Joined.`)
+    onJoinGame: () => {
       loadGames()
     },
-    onLeaveGame: (message) => {
-      toast.success(`🦄 ${message.userName} Left.`)
+    onLeaveGame: () => {
       loadGames()
     },
   })
@@ -223,14 +220,14 @@ const Game = () => {
         <Spinner />
       ) : (
         <>
-          {player && gameToJoin ? (
+          {player && game ? (
             <>
               <GameListItem
-                gameName={`Game #${gameToJoin.gameID}`}
+                gameName={`Game #${game.gameID}`}
                 onLeave={() => {
                   leaveGame()
                 }}
-                players={gameToJoin.players ?? []}
+                players={game.players ?? []}
               />
             </>
           ) : (
@@ -240,7 +237,7 @@ const Game = () => {
                 gamesList?.map((value, index) => {
                   return (
                     <GameListItem
-                      gameName={`Game #${index}`}
+                      gameName={`Game #${index+1}`}
                       key={`Game_List_Item_${index}`}
                       onJoin={() => {
                         onGameSelected(value)

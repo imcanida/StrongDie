@@ -25,7 +25,7 @@ const TopHeader = () => {
       <Nav className="ml-auto" navbar>
         {player ? (
           <>
-            {player.userName}
+            <p style={{ color: 'white' }}>User: {player.userName}</p>
             <NavItem>
               <StrongDieButton onClick={handleLogout}>Logout</StrongDieButton>
             </NavItem>

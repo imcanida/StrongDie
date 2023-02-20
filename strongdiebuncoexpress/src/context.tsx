@@ -1,5 +1,5 @@
 import * as signalR from '@microsoft/signalr'
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useState } from 'react'
 import { Player } from './api'
 import { useOnFirstLoad } from './helpers/useFirstLoad'
 

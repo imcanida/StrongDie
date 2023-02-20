@@ -16,7 +16,7 @@ import { toast } from 'react-toastify'
 
 const Game = () => {
   // Using App Context State
-  const { player, setPlayer } = useContext<AppContextDetails>(AppContext)
+  const { player } = useContext<AppContextDetails>(AppContext)
 
   // -- State Management --
   // Initial set of dice.
@@ -97,10 +97,6 @@ const Game = () => {
   }, [gamesList, indexOfGame, player])
 
   const pingAPI = useCallback(() => {
-    const playerObject = localStorage.getItem('player')
-    if (playerObject) {
-      setPlayer(JSON.parse(playerObject ?? ''))
-    }
     setApiIsOffline(true)
     StrongDieApi.pingCreate()
       .then(() => {
@@ -109,7 +105,7 @@ const Game = () => {
       .catch(() => {
         setApiIsOffline(false)
       })
-  }, [setPlayer])
+  }, [])
 
   const rollDice = () => {
     const request: RollDiceRequest = {
@@ -171,11 +167,26 @@ const Game = () => {
       })
   }
 
+  const onGameSelected = (value: GameListDetail) => {
+    setParticipant(player)
+    setGameToJoin(value)
+  }
+
+  const [participant, setParticipant] = useState<Player | undefined>()
+
+  // -- Watcher when the player is changed to undefined (logout) -- leave the game as well.
+  useEffect(() => {
+    if (!player) {
+      leaveGame()
+    }
+  }, [player, participant])
+
   useOnFirstLoad(() => {
     pingAPI()
   })
 
   useOnFirstLoad(() => {
+    setParticipant(player)
     loadGames()
   })
 
@@ -232,7 +243,7 @@ const Game = () => {
                       gameName={`Game #${index}`}
                       key={`Game_List_Item_${index}`}
                       onJoin={() => {
-                        setGameToJoin(value)
+                        onGameSelected(value)
                       }}
                       players={value.players ?? []}
                     />

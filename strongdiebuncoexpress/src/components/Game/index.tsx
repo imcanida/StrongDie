@@ -18,6 +18,9 @@ const Game = () => {
   const { player, game, setGame } = useContext<AppContextDetails>(AppContext)
   const [participant, setParticipant] = useState<Player | undefined>()
   // -- State Management --
+  // Moving this over from GameListItem so it can hold the state of the dice between leaves/joins.
+  const [activePlayerDiceRolls, setActivePlayerDiceRolls] = useState<{ [key: string]: number[] }>({})
+
   // Initial set of dice.
   const [diceValues, setDiceValues] = useState<ILoadedDiceSettings[]>([
     {
@@ -200,6 +203,7 @@ const Game = () => {
 
   return (
     <>
+      {loadGamesList && <Spinner />}
       {gameToJoin?.gameID && indexOfGame(gamesList) < 0 && (
         <>
           <JoinGameModal
@@ -211,81 +215,81 @@ const Game = () => {
           />
         </>
       )}
-      {loadGamesList ? (
-        <Spinner />
-      ) : (
-        <>
-          {player && game ? (
-            <>
-              <GameListItem
-                gameName={`Game #${game.gameID}`}
-                onLeave={() => {
-                  leaveGame()
-                }}
-                players={game.players ?? []}
-              />
-            </>
-          ) : (
-            <>
-              {
-                // false &&
-                gamesList?.map((value, index) => {
-                  return (
-                    <GameListItem
-                      gameName={`Game #${index+1}`}
-                      key={`Game_List_Item_${index}`}
-                      onJoin={() => {
-                        onGameSelected(value)
-                      }}
-                      players={value.players ?? []}
-                    />
-                  )
-                })
-              }
-            </>
-          )}
-          {apiIsOffline && (
-            <>
-              <Alert>
-                Dice Service are currently Offline!
-                <div>
-                  <StrongDieButton onClick={loadGames}>
-                    <FontAwesomeIcon icon={faRefresh} /> Retry
-                  </StrongDieButton>
-                </div>
-              </Alert>
-            </>
-          )}
-          {apiIsOffline === false && (
-            <>
-              <FlexedDiv>
-                <StrongDieButton disabled={loadingDieRoll} onClick={rollDice}>
-                  Roll <FontAwesomeIcon icon={faDice} />
+      <>
+        {player && game ? (
+          <>
+            <GameListItem
+              activePlayerDiceRolls={activePlayerDiceRolls ?? {}}
+              gameName={`Game #${game.gameID}`}
+              onLeave={() => {
+                leaveGame()
+              }}
+              players={game.players ?? []}
+              setActivePlayerDiceRolls={setActivePlayerDiceRolls}
+            />
+          </>
+        ) : (
+          <>
+            {
+              // false &&
+              gamesList?.map((value, index) => {
+                return (
+                  <GameListItem
+                    activePlayerDiceRolls={activePlayerDiceRolls ?? {}}
+                    gameName={`Game #${index + 1}`}
+                    key={`Game_List_Item_${index}`}
+                    onJoin={() => {
+                      onGameSelected(value)
+                    }}
+                    players={value.players ?? []}
+                    setActivePlayerDiceRolls={setActivePlayerDiceRolls}
+                  />
+                )
+              })
+            }
+          </>
+        )}
+        {apiIsOffline && (
+          <>
+            <Alert>
+              Dice Service are currently Offline!
+              <div>
+                <StrongDieButton onClick={loadGames}>
+                  <FontAwesomeIcon icon={faRefresh} /> Retry
                 </StrongDieButton>
-              </FlexedDiv>
-              <FlexedDiv>
-                {diceValues.map((details, index) => {
-                  return (
-                    <DieControl
-                      dieValue={details.dieValue}
-                      key={`die_control_${index}`}
-                      loadedDieSetting={details.loadedDie}
-                      onUpdate={(newValue: LoadedDieSetting) => {
-                        if (newValue) {
-                          const diceValuesCopy = [...diceValues]
-                          diceValuesCopy[index].loadedDie = newValue
-                          setDiceValues(diceValuesCopy)
-                        }
-                      }}
-                      roll={loadingDieRoll}
-                    />
-                  )
-                })}
-              </FlexedDiv>
-            </>
-          )}
-        </>
-      )}
+              </div>
+            </Alert>
+          </>
+        )}
+        {apiIsOffline === false && (
+          <>
+            <FlexedDiv>
+              <StrongDieButton disabled={loadingDieRoll} onClick={rollDice}>
+                Roll <FontAwesomeIcon icon={faDice} />
+              </StrongDieButton>
+            </FlexedDiv>
+            <FlexedDiv>
+              {diceValues.map((details, index) => {
+                return (
+                  <DieControl
+                    dieValue={details.dieValue}
+                    key={`die_control_${index}`}
+                    loadedDieSetting={details.loadedDie}
+                    onUpdate={(newValue: LoadedDieSetting) => {
+                      if (newValue) {
+                        const diceValuesCopy = [...diceValues]
+                        diceValuesCopy[index].loadedDie = newValue
+                        setDiceValues(diceValuesCopy)
+                      }
+                    }}
+                    roll={loadingDieRoll}
+                  />
+                )
+              })}
+            </FlexedDiv>
+          </>
+        )}
+      </>
     </>
   )
 }

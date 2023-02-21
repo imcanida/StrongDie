@@ -44,8 +44,8 @@ namespace StrongDieAPI.Controllers.Game.Roll
                 rolls[i] = dieRoll;
             }
 
-            // If the roll had a game&user -- send messages to other connections in the group.
-            if (request?.GameID.HasValue ?? false && !string.IsNullOrEmpty(request?.UserName))
+            // If the roll had a user -- send messages to other connections in the group.
+            if (!string.IsNullOrEmpty(request?.UserName))
             {
                 // Grab the Player Record - who's rolling.
                 var user = await _userRepository.GetByUserName(request.UserName ?? "");
@@ -61,7 +61,8 @@ namespace StrongDieAPI.Controllers.Game.Roll
                         DiceRollResults = rolls
                     };
 
-                    var gameName = GameHub.DeriveGameName(request.GameID.Value);
+                    // Not worrying about groups for this.
+                    //var gameName = GameHub.DeriveGameName(request.GameID.Value);
 
                     // Send SignalR Client Rolls Results -- To the group of that game only.
                     await _gameHub.Clients

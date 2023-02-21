@@ -1,6 +1,6 @@
 import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { Player } from '../../api'
 import { AppContextDetails, AppContext } from '../../context'
 import { TightFlexDiv } from '../../helpers/Styles'
@@ -14,11 +14,12 @@ interface IGameListItem {
   players: Player[]
   onJoin?: () => void
   onLeave?: () => void
+  activePlayerDiceRolls: { [key: string]: number[] }
+  setActivePlayerDiceRolls: (activePlayerDiceRolls: { [key: string]: number[] }) => void
 }
 
-const GameListItem = ({ gameName, players, onJoin, onLeave }: IGameListItem) => {
+const GameListItem = ({ gameName, players, onJoin, onLeave, activePlayerDiceRolls, setActivePlayerDiceRolls}: IGameListItem) => {
   const { player } = useContext<AppContextDetails>(AppContext)
-  const [activePlayerDiceRolls, setActivePlayerDiceRolls] = useState<{ [key: string]: number[] }>({})
   
   // Map activePlayerDiceRolls from Players.
   const filledPlayerSlots = players.map((participant) => {

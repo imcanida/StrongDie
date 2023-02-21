@@ -1,6 +1,6 @@
 import { faHatWizard } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 import { Form, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
 import { JoinGameRequest } from '../../api'
 import { AppContext, AppContextDetails } from '../../context'
@@ -15,7 +15,6 @@ interface IJoinGame {
 }
 
 const JoinGameModal = ({ gameID, loadGames, onClosed }: IJoinGame) => {
-  const inputRef = useRef<HTMLInputElement>(null);
   const { player, setPlayer } = useContext<AppContextDetails>(AppContext)
   const [loadJoiningGame, setLoadJoiningGame] = useState<boolean>(false)
   const [userName, setUserName] = useState<string>(localStorage.getItem('userName') ?? '')
@@ -62,14 +61,6 @@ const JoinGameModal = ({ gameID, loadGames, onClosed }: IJoinGame) => {
       handleJoinGame(player.userName)
     }
   })
-
-  useEffect(() => {
-    console.log('we are in the useEffect')
-    if(inputRef && inputRef?.current) {
-      console.log('focus..')
-      inputRef.current.focus()
-    }
-  }, []);
 
   return (
     <>

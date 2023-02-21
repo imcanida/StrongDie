@@ -45,7 +45,7 @@ const Game = () => {
   const [gameToJoin, setGameToJoin] = useState<GameListDetail>()
   const [gamesList, setGamesList] = useState<GameListDetail[]>([])
   const [loadGamesList, setLoadGamesList] = useState<boolean>(false)
-  
+
   const [loadingDieRoll, setLoadingDieRoll] = useState<boolean>(false)
   const [animateRolls] = useState<boolean>(false) // Just playing with "animating the die"
 
@@ -56,7 +56,7 @@ const Game = () => {
     [player]
   )
 
-  const loadGames = useCallback(() => {
+  const loadGames = () => {
     setLoadGamesList(true)
     return StrongDieApi.gameListCreate({})
       .then((response) => {
@@ -80,7 +80,7 @@ const Game = () => {
       .finally(() => {
         setLoadGamesList(false)
       })
-  }, [indexOfGame])
+  }
 
   useEffect(() => {
     if (player && player.userName) {
@@ -89,10 +89,8 @@ const Game = () => {
       // No game found --
       if (playerGameIndex < 0) {
         setGame(undefined)
-        // setGameToJoin(undefined)
       } else if (gamesList) {
         setGame(gamesList[playerGameIndex])
-        // setGameToJoin(gamesList[playerGameIndex])
       }
     }
   }, [gamesList, indexOfGame, player])
@@ -156,7 +154,6 @@ const Game = () => {
     }
     return StrongDieApi.gameLeaveCreate(request)
       .then((response) => {
-        // Send SignalR
         return response
       })
       .catch((error) => {
@@ -172,8 +169,6 @@ const Game = () => {
     setParticipant(player)
     setGameToJoin(value)
   }
-
-  
 
   // -- Watcher when the player is changed to undefined (logout) -- leave the game as well.
   useEffect(() => {

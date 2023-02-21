@@ -7,7 +7,7 @@ import { TightFlexDiv } from '../../helpers/Styles'
 import { useOnFirstLoad } from '../../helpers/useFirstLoad'
 import DieMap from '../DieControl/DieMap'
 import { useSignalRGameHub } from '../useSignalRGameHub'
-import { Card, PlayerIconContainer, ActivePlayerIcon, FilledPlayerIcon, EmptyPlayerIcon, GameName, PlayerList, JoinButton, LeaveButton } from './StyledComponents'
+import { GameItemCard, PlayerIconContainer, ActivePlayerIcon, FilledPlayerIcon, EmptyPlayerIcon, GameName, PlayerList, JoinButton, LeaveButton } from './StyledComponents'
 
 interface IGameListItem {
   gameName: string
@@ -56,12 +56,14 @@ const GameListItem = ({ gameName, players, onJoin, onLeave }: IGameListItem) => 
 
   const playerSlots = [...filledPlayerSlots, ...emptyPlayerSlots]
   useSignalRGameHub({
-    onLeaveGame: (message) => {
-      if (!message?.userName) return
-      const copy = { ...activePlayerDiceRolls }
-      delete copy[message?.userName]
-      setActivePlayerDiceRolls(copy)
-    },
+    // Cannot double up event listeners.
+    // onLeaveGame: (message) => {
+    //   console.log('Game.onLeaveGame', message)
+    //   if (!message?.userName) return
+    //   const copy = { ...activePlayerDiceRolls }
+    //   delete copy[message?.userName]
+    //   setActivePlayerDiceRolls(copy)
+    // },
     onDiceRolled: (message) => {
       // Update activePlayerDiceRolls roll by username
       if (!message?.actor?.userName) return
@@ -79,11 +81,11 @@ const GameListItem = ({ gameName, players, onJoin, onLeave }: IGameListItem) => 
   })
 
   return (
-    <Card>
+    <GameItemCard>
       <GameName>{gameName}</GameName>
         <PlayerList>{playerSlots}</PlayerList>
       {onJoin ? <JoinButton onClick={onJoin}>Join</JoinButton> : <LeaveButton onClick={onLeave}>Leave</LeaveButton>}
-    </Card>
+    </GameItemCard>
   )
 }
 

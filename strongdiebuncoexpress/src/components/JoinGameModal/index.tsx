@@ -1,7 +1,7 @@
 import { faHatWizard } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useCallback, useContext, useState } from 'react'
-import { Alert, Form, FormGroup, Label, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { Form, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
 import { JoinGameRequest } from '../../api'
 import { AppContext, AppContextDetails } from '../../context'
 import { PromiseToJoinGame } from '../../helpers/StrongDieApi'
@@ -15,6 +15,7 @@ interface IJoinGame {
 }
 
 const JoinGameModal = ({ gameID, loadGames, onClosed }: IJoinGame) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const { player, setPlayer } = useContext<AppContextDetails>(AppContext)
   const [loadJoiningGame, setLoadJoiningGame] = useState<boolean>(false)
   const [userName, setUserName] = useState<string>(localStorage.getItem('userName') ?? '')
@@ -62,18 +63,27 @@ const JoinGameModal = ({ gameID, loadGames, onClosed }: IJoinGame) => {
     }
   })
 
+  useEffect(() => {
+    console.log('we are in the useEffect')
+    if(inputRef && inputRef?.current) {
+      console.log('focus..')
+      inputRef.current.focus()
+    }
+  }, []);
+
   return (
     <>
-      <Modal isOpen={playerExists} onClosed={onClosed}>
+      <Modal autoFocus={false} isOpen={playerExists} onClosed={onClosed}>
         <ModalHeader>Join Game</ModalHeader>
         <ModalBody>
           <Form>
             <FormGroup row>
               <Label>
-                <FlexedSpaceBetweenDiv>Name:</FlexedSpaceBetweenDiv>
+                <FlexedSpaceBetweenDiv>Player Name:</FlexedSpaceBetweenDiv>
               </Label>
               <FlexedSpaceBetweenDiv>
-                <input
+                <Input
+                  autoFocus={true}
                   defaultValue={userName}
                   onChange={(event) => {
                     setUserName(event?.target?.value ?? 0)
@@ -84,11 +94,6 @@ const JoinGameModal = ({ gameID, loadGames, onClosed }: IJoinGame) => {
                   type="text"
                 />
               </FlexedSpaceBetweenDiv>
-              <div>
-                <Alert color="info">
-                  <small>Name of the player.</small>
-                </Alert>
-              </div>
             </FormGroup>
           </Form>
         </ModalBody>

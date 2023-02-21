@@ -14,6 +14,7 @@ interface IUseSignalRGameHub {
   onLeaveGame?: (message: Player) => void
 }
 
+// TODO: Make it register callbacks for each event that is passed in, so it can work with multiple components.
 const useSignalRGameHub = (options: IUseSignalRGameHub) => {
   const { isConnected, connection } = useContext<AppContextDetails>(AppContext)
 

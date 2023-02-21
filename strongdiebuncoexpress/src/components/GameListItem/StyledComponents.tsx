@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import styled from "styled-components"
 import { StrongDieButton } from "../../helpers/Styles"
 
-export const Card = styled.div`
+export const GameItemCard = styled.div`
   background-color: #fff;
   border: 1px solid #ccc;
   box-shadow: 0 2px 2px #ccc;
@@ -22,15 +22,6 @@ export const GameName = styled.div`
   color: #333;
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  margin-top: 10px;
-`
-
-export const Container = styled.div`
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;

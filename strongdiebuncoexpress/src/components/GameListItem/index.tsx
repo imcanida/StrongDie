@@ -6,7 +6,6 @@ import { AppContextDetails, AppContext } from '../../context'
 import { TightFlexDiv } from '../../helpers/Styles'
 import { useOnFirstLoad } from '../../helpers/useFirstLoad'
 import DieMap from '../DieControl/DieMap'
-import { useSignalRGameHub } from '../useSignalRGameHub'
 import { GameItemCard, PlayerIconContainer, ActivePlayerIcon, FilledPlayerIcon, EmptyPlayerIcon, GameName, PlayerList, JoinButton, LeaveButton } from './StyledComponents'
 
 interface IGameListItem {
@@ -15,10 +14,9 @@ interface IGameListItem {
   onJoin?: () => void
   onLeave?: () => void
   activePlayerDiceRolls: { [key: string]: number[] }
-  setActivePlayerDiceRolls: (activePlayerDiceRolls: { [key: string]: number[] }) => void
 }
 
-const GameListItem = ({ gameName, players, onJoin, onLeave, activePlayerDiceRolls, setActivePlayerDiceRolls}: IGameListItem) => {
+const GameListItem = ({ gameName, players, onJoin, onLeave, activePlayerDiceRolls }: IGameListItem) => {
   const { player } = useContext<AppContextDetails>(AppContext)
   
   // Map activePlayerDiceRolls from Players.
@@ -56,23 +54,6 @@ const GameListItem = ({ gameName, players, onJoin, onLeave, activePlayerDiceRoll
   ))
 
   const playerSlots = [...filledPlayerSlots, ...emptyPlayerSlots]
-  useSignalRGameHub({
-    // Cannot double up event listeners.
-    // onLeaveGame: (message) => {
-    //   console.log('Game.onLeaveGame', message)
-    //   if (!message?.userName) return
-    //   const copy = { ...activePlayerDiceRolls }
-    //   delete copy[message?.userName]
-    //   setActivePlayerDiceRolls(copy)
-    // },
-    onDiceRolled: (message) => {
-      // Update activePlayerDiceRolls roll by username
-      if (!message?.actor?.userName) return
-      const copy = { ...activePlayerDiceRolls }
-      copy[message?.actor?.userName] = message.diceRollResults
-      setActivePlayerDiceRolls(copy)
-    },
-  })
 
   useOnFirstLoad(() => {
     for (const key in players) {

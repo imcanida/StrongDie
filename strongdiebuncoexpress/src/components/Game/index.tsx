@@ -199,6 +199,13 @@ const Game = () => {
     onLeaveGame: () => {
       loadGames()
     },
+    onDiceRolled: (message) => {
+      // Update activePlayerDiceRolls roll by username
+      if (!message?.actor?.userName) return
+      const copy = { ...activePlayerDiceRolls }
+      copy[message?.actor?.userName] = message.diceRollResults
+      setActivePlayerDiceRolls(copy)
+    },
   })
 
   return (
@@ -225,7 +232,6 @@ const Game = () => {
                 leaveGame()
               }}
               players={game.players ?? []}
-              setActivePlayerDiceRolls={setActivePlayerDiceRolls}
             />
           </>
         ) : (
@@ -242,7 +248,6 @@ const Game = () => {
                       onGameSelected(value)
                     }}
                     players={value.players ?? []}
-                    setActivePlayerDiceRolls={setActivePlayerDiceRolls}
                   />
                 )
               })
